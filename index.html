@@ -1,592 +1,238 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>경기지역본부 · 업무대체 관리방</title>
-  
-  <!-- React & ReactDOM -->
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-  
-  <!-- Babel (JSX Transpiler) -->
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  
-  <!-- Tailwind CSS -->
-  <script src="https://cdn.tailwindcss.com"></script>
-  
-  <!-- Prop-Types (Recharts 의존성) -->
-  <script src="https://unpkg.com/prop-types/prop-types.min.js"></script>
-  
-  <!-- Recharts -->
-  <script src="https://unpkg.com/recharts@2.12.7/umd/Recharts.js"></script>
-  
-  <!-- Lucide Icons -->
-  <script src="https://unpkg.com/lucide@latest"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>대기활동 현황판</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#161616;color:#eee;font-family:system-ui,-apple-system,BlinkMacSystemFont,"Noto Sans KR",sans-serif}
+button{font:inherit;cursor:pointer}
+.app{min-height:100vh;background:#161616;padding-bottom:35px}
+header{padding:16px 16px 10px;border-bottom:1px solid #292929;background:#1c1c1c}
+.top{display:flex;justify-content:space-between;align-items:flex-end}
+.eyebrow{font-size:11px;color:#f5c400;font-weight:800;margin-bottom:5px}
+.title{font-size:21px;font-weight:900;margin:0}
+.big{font-size:31px;font-weight:900;color:#f5c400;line-height:1;text-align:right}
+.small{font-size:9px;color:#888;text-align:right}
+.dates{display:flex;gap:6px;margin-top:12px;overflow-x:auto;padding-bottom:3px}
+.chip{flex:0 0 auto;padding:6px 12px;border-radius:20px;background:#232323;border:1px solid #363636;color:#999;font-size:12px;font-weight:700}
+.chip.active{background:#f5c400;color:#191919;border-color:#f5c400}
+.card{margin:14px 14px 0;background:#1c1c1c;border:1px solid #292929;border-radius:12px;padding:12px 8px 9px}
+.cardhead{display:flex;justify-content:space-between;align-items:center;padding:0 6px 9px;gap:8px}
+.label{font-size:11px;color:#999;font-weight:800}
+.tabs{display:flex;background:#232323;border-radius:8px;padding:2px;gap:2px}
+.tab{border:0;background:transparent;color:#888;border-radius:6px;padding:6px 8px;font-size:10px;font-weight:800}
+.tab.active{background:#f5c400;color:#191919}
+.chart{display:flex;align-items:flex-end;gap:10px;height:185px;padding:10px 8px 5px}
+.barwrap{height:100%;flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;min-width:28px}
+.barvalue{font-size:11px;color:#fff;font-weight:bold;margin-bottom:4px}
+.bar{width:70%;max-width:44px;border-radius:5px 5px 0 0;min-height:3px;box-shadow: 0 0 6px rgba(245,196,0,0.2)}
+.barlabel{font-size:11px;color:#aaa;margin-top:6px}
+.list{padding-top:2px}
+.prow{display:flex;align-items:center;gap:7px;padding:6px;border-bottom:1px solid #222}
+.dot{width:8px;height:8px;border-radius:50%;flex:0 0 auto}
+.pname{font-size:12px;font-weight:750;white-space:nowrap;display:flex;align-items:center;gap:3px}
+.pcount{font-size:11px;color:#f5c400;font-weight:bold;font-family:monospace}
+.ptag{font-size:9px;color:#777;width:25px;flex:0 0 25px}
+.pbar{height:14px;background:#262626;border-radius:7px;overflow:hidden;flex:1;box-shadow:inset 0 1px 2px rgba(0,0,0,0.5)}
+.fill{height:100%;border-radius:7px;min-width:3px;transition:width 0.3s ease}
+.badge{font-size:9px;font-weight:800;padding:2px 6px;border-radius:12px;border:1px solid;white-space:nowrap;font-family:monospace}
+.hint{text-align:center;font-size:10px;color:#666;margin-top:8px}
+.section{margin:14px 14px 0}
+.sectionhead{font-size:11px;color:#999;font-weight:800;margin-bottom:7px}
+.branch{background:#1c1c1c;border:1px solid #292929;border-radius:10px;margin-bottom:7px;overflow:hidden}
+.bhead{width:100%;border:0;background:transparent;color:#eee;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;text-align:left}
+.bleft{display:flex;align-items:center;gap:7px}
+.bname{font-size:13px;font-weight:800}
+.bcnt{font-size:10px;color:#888;font-family:monospace}
+.entries{border-top:1px solid #232323}
+.erow{display:flex;align-items:center;gap:8px;padding:7px 12px;border-top:1px solid #232323}
+.etime{font-size:11px;color:#f5c400;font-family:monospace;width:40px;flex:0 0 40px}
+.ebody{flex:1;min-width:0}
+.ename{font-size:13px;font-weight:700;display:flex;align-items:center;gap:4px}
+.eact{font-size:11px;color:#999;margin-top:2px;white-space:normal;word-break:keep-all}
+.footer{text-align:center;color:#555;font-size:10px;margin-top:16px}
+@media(max-width:420px){
+  .tabs .tab{padding:6px 5px;font-size:9px}
+  .prow{gap:5px}
+  .ptag{width:24px;flex-basis:24px}
+  .badge{font-size:8px;padding:2px 5px}
+}
+</style>
 </head>
-<body style="background-color: #121418; margin: 0; padding: 0;">
-  <div id="root"></div>
+<body>
+<div id="app"></div>
 
-  <script type="text/babel">
-    const { useState, useEffect, useMemo } = React;
-    const { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } = Recharts;
+<script>
+const SD={"강의석":3,"김정현":22,"문진기":17,"최현재":16,"전성준":15,"천명환":15,"백기경":14,"윤정희":11,"이재훈":11,"정종덕":10,"노남수":7,"박영현":5,"서재승":4,"박점규":4,"임장현":4,"김상궁":4,"황도연":4,"이상건":3,"윤대식":3,"최원영":1,"최명성":1,"이재성":1,"백창선":6};
+const BC={"북부":"#F5C400","북서":"#E8A93B","남부":"#3B8C6E","동부":"#4C8DBF","서부":"#9B6FB0","남서":"#D6764F","용인":"#5F6FA8","중부":"#7A9E3B"};
+const R=[
+  ["중부","강의석","2026-07-11"],["남부","강성완","2026-05-16"],["남부","임대현","2026-08-28"],["남부","문진기","2026-05-06"],["용인","천명환","2026-05-12"],["서부","노남수","2026-05-13"],["남서","최현재","2026-05-13"],["서부","황도연","2026-07-19"],["서부","최명성","2026-07-23"],["동부","이재성","2026-07-25"],["동부","백승진","2026-08-22"],["북부","김재선","2026-07-27"],["용인","전성준","2026-06-01"],["동부","정종덕","2026-06-04"],["남서","김형삼","2026-06-04"],["남서","백시안","2026-09-01"],["용인","백기경","2026-06-17"],["서부","박점규","2026-06-19"],["동부","이재훈","2026-06-20"],["북서","박영현","2026-06-20"],["북서","김상궁","2026-06-27"],["북부","임장현","2026-06-28"],["북부","이상건","2026-07-05"],["북서","최원영","2026-07-11"],["북서","강태규","2026-07-16"],["북서","배형만","2026-08-22"],["북부","서재준","2026-08-24"],["북부","안영진","2026-08-19"],["북서","엄동기","2026-07-29"],["동부","김주찬","2026-08-02"],["남서","남의송","2026-08-02"],["서부","윤성우","2026-08-02"],["서부","최혁","2026-08-09"],["서부","정민섭","2026-08-29"],["서부","도형래","2026-08-31"],["북부","윤대식","2026-07-13"],["중부","백창선","2026-07-30"]
+].map(x=>({b:x[0],n:x[1],s:x[2]}));
 
-    const PERSON_PALETTE = ["#5B8DEF", "#F2A93B", "#C084E0", "#4ADE80", "#F87171", "#22C5C5", "#EAB308", "#A855F7"];
-    const RECORDS_KEY = "substitution-records";
-    const ROSTER_KEY = "substitution-roster";
+const D={
+  "2026-08-09":[["북서","엄동기","서초 롯데건설본사 집회신고","12:19"]],
+  "2026-08-10":[["남서","최현재","정윤기 조직차장 간부대체","06:34"],["남부","문진기","평택고덕64블럭 집회","07:08"],["북부","김재선","남부지부장님 김우선 대체근무","07:15"],["동부","이재성","광주역동 효성건설 집회","08:07"],["동부","김주찬","광주역동 효성건설 집회","08:07"],["용인","백기경","한양건설 본사(서울) 집회","08:09"],["서부","황도연","안산동부건설 사무실 집회","08:11"],["서부","윤성우","안산동부건설 사무실 집회","08:13"],["서부","노남수","종로경찰서 집회신고","10:17"],["남서","남의송","화성서부·오산경찰서 집회신고","10:18"]],
+  "2026-08-11":[["남부","문진기","평택고덕64블럭 집회","06:45"],["남서","최현재","정윤기 조직차장 간부대체","06:57"],["북서","엄동기","과천효성 집회·롯데건설본사 집회","07:05"],["북서","최원영","과천효성 집회","07:05"],["북서","김상궁","과천효성 집회","07:07"],["북서","강태규","과천효성 집회·롯데건설본사 집회","07:08"],["북서","박영현","과천효성 집회·롯데건설본사 집회","07:11"],["동부","정종덕","송파 한양본사 집회","08:18"],["용인","백기경","유방동 한림제약 지식산업센터 집회","08:43"],["용인","김정현","한림제약 도시첨단산업단지 집회","08:46"],["동부","이재훈","동부지부 집회신고","10:23"]],
+  "2026-08-12":[["남서","최현재","정윤기 조직차장 간부대체","06:29"],["북서","엄동기","서초 롯데건설본사 집회","06:44"],["북서","박영현","롯데본사 집회","06:44"],["동부","정종덕","송파 한양본사 집회","08:20"],["북서","강태규","안양동안구 롯데건설 집회신고","13:47"]],
+  "2026-08-13":[["남서","최현재","정윤기 조직차장 간부대체","05:32"],["동부","정종덕","송파 한양본사 집회","08:03"]],
+  "2026-08-14":[["중부","백창선","당수SM그룹 집회","06:51"],["동부","정종덕","송파 한양본사 집회","07:42"],["동부","김주찬","송파 한양본사 집회","07:42"]],
+  "2026-08-15":[["중부","백창선","SM그룹 서울본사 집회신고","08:39"]],
+  "2026-08-17":[["북서","엄동기","안양 역세권 현대산업개발·상록지구 GS건설 집회신고","11:15"]],
+  "2026-08-18":[["남부","문진기","평택고덕64블럭 집회","06:33"],["용인","전성준","한양건설 회장 자택(서울) 집회","08:20"],["북서","박영현","의왕고천 현대산업개발·SK뷰 현장방문","10:09"],["북서","엄동기","의왕고천 현대산업개발·SK뷰 현장방문","10:09"],["용인","김정현","원삼SK 열병합발전소 관내 현장활동","12:07"],["북서","강태규","SK본사·현대산업개발본사 집회신고","14:28"],["북부","이상건","포스코 현장 집회신고","15:50"]],
+  "2026-08-19":[["남부","문진기","평택고덕 계룡건설 13블럭 집회","06:59"],["북부","김재선","남부지부 김우선 지부장 대체","07:13"],["남서","최현재","정윤기 조직차장 간부대체","07:17"],["남서","김형삼","한양건설 회장자택 집회","07:29"]],
+  "2026-08-20":[["남부","문진기","평택고덕 현대건설 65블럭 집회","06:40"],["북부","김재선","남부지부 김우선 지부장 대체근무","06:46"],["남서","김형삼","한양건설 회장자택 집회","07:07"],["용인","천명환","용인 고림2지구 동문건설 집회","08:10"],["용인","백기경","용인 고림2지구 동문건설 집회","08:11"],["서부","황도연","강남구 역삼동 반도건설본사 집회신고",""]],
+  "2026-08-21":[["남부","강성완","유·무인현장 방문활동","16:43"]],
+  "2026-08-24":[["북서","최원영","의왕 고천동 SK현대산업개발 집회","07:01"],["북서","박영현","의왕 고천동 SK현대산업개발 집회","07:01"],["북부","임장현","한양건설 회장자택 집회","07:02"],["북부","이상건","한양건설 회장자택 집회","07:02"],["북서","강태규","의왕 고천동 SK현대산업개발 집회","07:07"],["북서","배형만","의왕 고천동 SK현대산업개발 집회","07:07"],["북부","윤대식","유·무인현장 방문활동","16:30"],["북부","안영진","유·무인현장 방문활동","16:32"],["북서","엄동기","의왕 고천동 SK현대산업개발 집회","13:00"],["남부","문진기","계룡건설 본사 집회신고","14:23"],["북부","윤대식","지부장님과 현장방문·집회신고","14:24"],["서부","윤성우","박춘성 사무장 대체업무",""]],
+  "2026-08-25":[["북부","임장현","한양건설 회장자택 집회","06:55"],["북부","이상건","한양건설 회장자택 집회","06:56"],["중부","백창선","서울SM본사 집회","08:11"],["중부","강의석","서울SM본사 집회","08:12"],["남서","김형삼","SK 집회활동",""],["북서","엄동기","의왕 고천동 SK헌산 집회","10:22"],["동부","이재훈","의왕 고천동 SK현대산업개발 집회","10:22"],["동부","김주찬","의왕 고천동 SK현대산업개발 집회","10:22"],["북서","배형만","의왕 고천동 SK현대산업개발 집회","10:22"],["북서","김상궁","의왕 고천동 SK현대산업개발 집회","10:23"],["북서","박영현","의왕 고천동 SK현대산업개발 집회","10:24"],["북부","윤대식","집회신고","11:04"],["남서","남의송","의왕 고천동 SK현대산업개발 집회","11:19"],["북서","강태규","제일풍경채·효성해링턴 본사 집회신고","12:12"],["북부","안영진","집회신고 및 유무인현장활동","14:22"],["서부","최혁","우경원 노안부장 대체","15:51"],["동부","백승진","동부지부 지부장님과 현장활동","17:18"],["북부","김재선","김우선 지부장 대체","17:19"]],
+  "2026-08-26":[["북부","임장현","한양건설 자택 집회","06:56"],["북부","이상건","한양건설 자택 집회","07:04"],["북부","김재선","김우선 지부장 대체",""],["북부","윤대식","현장활동 방문",""],["북부","안영진","현장활동 방문",""],["북서","최원영","GS 집회신고",""],["서부","최혁","호반건설 본사 집회",""],["서부","윤성우","호반건설 본사 집회",""],["서부","노남수","노동부 진술방문",""],["남부","강성완","유·무인현장활동","15:35"],["북서","김상궁","GS 대우건설본사 집회신고","14:38"],["중부","백창선","당수동 경남기업·평동 동아건설·영통 비에이치아이 집회신고","14:46"],["서부","박점규","용산·구로경찰서 집회신고","15:05"],["북서","강태규","까뮤이엔씨 집회신고","19:10"],["남서","김형삼","오산·병점 남서 집회신고","16:50"]],
+  "2026-08-27":[["남서","최현재","정윤기 조직차장 대체근무","06:31"],["북부","임장현","한양건설 자택 집회","06:54"],["북부","이상건","한양건설 자택 집회","07:00"],["서부","박점규","호반건설 본사 집회","07:51"],["서부","황도연","호반건설 본사 집회","07:52"],["용인","전성준","용인동부경찰서 집회신고","07:52"],["남부","문진기","한신공영 본사·분당 오너 자택 집회신고","11:10"],["북서","강태규","한신공영 서울지사·제일공영 집회신고","11:40"],["북서","배형만","강동경찰서 제일건설·광진경찰서 한신공영 집회신고","15:20"],["서부","최명성","서부지부 집회신고","18:21"]],
+  "2026-08-28":[["남서","최현재","정윤기 조직차장 대체근무","06:45"],["북부","임장현","한양건설 자택 집회","07:07"],["북부","이상건","한양건설 자택 집회","07:07"],["서부","노남수","호반건설 본사 집회","08:01"],["서부","최명성","호반건설 본사 집회","08:01"],["용인","백기경","문주식 조직차장 대체근무","08:33"]],
+  "2026-08-29":[["북부","안영진","북부지부 집회신고","19:44"]],
+  "2026-08-31":[["남서","최현재","정윤기 조직차장 대체근무","06:45"],["북부","김재선","김우선 지부장 대체근무","06:52"],["북서","엄동기","제일건설회장 광주자택 집회 (1)","07:34"],["북서","엄동기","제일건설회장 광주자택 집회 (2)","07:34"],["북서","엄동기","제일건설회장 광주자택 집회 (3)","07:34"],["북서","엄동기","제일건설회장 광주자택 집회 (4)","07:34"],["북서","강태규","제일건설회장 광주자택 집회 (1)","07:34"],["북서","강태규","제일건설회장 광주자택 집회 (2)","07:34"],["북서","강태규","제일건설회장 광주자택 집회 (3)","07:34"],["북서","강태규","제일건설회장 광주자택 집회 (4)","07:34"],["북서","최원영","문주식 조직차장 대체","07:45"],["서부","노남수","안산시흥관내 집회신고","10:22"],["서부","황도연","강남구 역삼동 동부건설 본사 집회신고",""],["동부","이재훈","고발관련 노동부 방문",""]],
+  "2026-09-01":[["남서","최현재","정윤기 조직차장 대체근무","06:49"],["서부","최혁","호반건설 집회","08:42"],["서부","윤성우","호반건설 회장자택 집회","08:43"],["북서","최원영","까뮤이앤씨 집회","09:59"],["북서","배형만","까뮤이앤씨 집회","10:07"],["북서","김상궁","까뮤이앤씨 집회","10:10"],["중부","강의석","중부방송차 정비","12:06"],["북부","윤대식","노동부 출석",""]],
+  "2026-09-02":[["서부","황도연","호반 회장자택 집회","07:51"],["서부","최명성","호반 회장자택 집회","07:51"],["서부","윤성우","박춘성 사무장 대체",""],["북서","배형만","까뮤이앤씨 집회","10:04"],["북서","최원영","까뮤이앤씨 집회","10:04"],["남서","남의송","집회활동",""],["남서","김형삼","집회활동",""]],
+  "2026-09-03":[["남서","최현재","정윤기 조직차장님 대체근무","06:15"],["북서","강태규","지부장님과 북서지부 관내 활동합니다","08:59"],["서부","최명성","(홈플러스부지, 제로투엔, 아라종합건설) 현장활동 합니다.","11:31"]]
+};
 
-    const SEED_RECORDS = [
-      { id: "seed-0810-nambu", date: "2026-08-10", branch: "본부", position: "지부장", requester: "김우선", substitute: "김재선", workDetails: "금호건설·코오롱건설 사무실집회", companion: "김길진, 문진기, 양완중", note: "" },
-      { id: "seed-0810-bukseo", date: "2026-08-10", branch: "본부", position: "북서지부장 대행", requester: "엄동섭", substitute: "엄기재", workDetails: "안양 현대건설, 의왕 제일풍경체, 삼보현장 방문", companion: "구윤상 (북서지부 대기자)", note: "" },
-      { id: "seed-0810-bonbu", date: "2026-08-10", branch: "본부", position: "조직차장", requester: "정윤기", substitute: "최현재", workDetails: "고발장 출석", companion: "", note: "단독" },
-      { id: "seed-0810-dongbu", date: "2026-08-10", branch: "본부", position: "동부지부장", requester: "정승일", substitute: "임재명", workDetails: "광주 효성집회", companion: "이재성, 김주찬", note: "" },
-      { id: "seed-0811-bukseo", date: "2026-08-11", branch: "본부", position: "북서지부장 대행", requester: "엄동섭", substitute: "엄기재", workDetails: "과천 효성건설 저가입찰 반대집회", companion: "북서지부 4개월미만 대기자", note: "" },
-      { id: "seed-0810-yongin", date: "2026-08-10", branch: "본부", position: "용인지부장", requester: "이우진", substitute: "임현창", workDetails: "한양건설 본사집회", companion: "백기경, 송동하", note: "" },
-      { id: "seed-0811-bonbu", date: "2026-08-11", branch: "본부", position: "조직차장", requester: "정윤기", substitute: "최현재", workDetails: "노안활동", companion: "엄기우 (조직차장)", note: "" },
-      { id: "seed-0811-bonbu-pss", date: "2026-08-11", branch: "본부", position: "조직부장", requester: "박승환", substitute: "조진명", workDetails: "북서 효성건설·롯데건설 집회인솔", companion: "북서지부장", note: "" },
-      { id: "seed-0812-bonjo", date: "2026-08-12", branch: "본조", position: "본부장", requester: "박문철", substitute: "박영주", workDetails: "중집", companion: "", note: "" },
-      { id: "seed-0813-bonjo", date: "2026-08-13", branch: "본조", position: "본부장", requester: "박문철", substitute: "박영주", workDetails: "중집", companion: "", note: "" },
-      { id: "seed-0812-bonbu-jyk", date: "2026-08-12", branch: "본부", position: "조직차장", requester: "정윤기", substitute: "최현재", workDetails: "노안활동", companion: "이준영 (조직차장)", note: "" },
-      { id: "seed-0812-bonbu-ljy", date: "2026-08-12", branch: "본부", position: "조직차장", requester: "이준영", substitute: "임현창", workDetails: "노안활동", companion: "정윤기 (조직차장)", note: "" },
-      { id: "seed-0812-bonbu-pss", date: "2026-08-12", branch: "본부", position: "조직부장", requester: "박승환", substitute: "조진명", workDetails: "북서 효성건설·롯데건설 집회인솔", companion: "북서지부원", note: "" },
-      { id: "seed-0812-namseo", date: "2026-08-12", branch: "본부", position: "지부장", requester: "황창연", substitute: "박정환", workDetails: "현장활동, 소형신규진행현장방문 4곳(병점서플러스 등), 유인현장방문(하길리404, KCC)", companion: "남서 김철", note: "" },
-      { id: "seed-0812-bonbu-mjs", date: "2026-08-12", branch: "본부", position: "조직차장", requester: "문주식", substitute: "엄기재", workDetails: "노안활동", companion: "엄기우 (조직차장)", note: "" },
-      { id: "seed-0813-bonbu-jyk", date: "2026-08-13", branch: "본부", position: "조직차장", requester: "정윤기", substitute: "최현재", workDetails: "노안활동", companion: "엄기우 (조직차장)", note: "" },
-      { id: "seed-0813-bonbu-ljy", date: "2026-08-13", branch: "본부", position: "조직차장", requester: "이준영", substitute: "임현창", workDetails: "노안활동", companion: "문주식 (조직차장)", note: "" },
-      { id: "seed-0813-bonbu-mjs", date: "2026-08-13", branch: "본부", position: "조직차장", requester: "문주식", substitute: "엄기재", workDetails: "노안활동", companion: "이준영 (조직차장)", note: "" },
-      { id: "seed-0814-bonbu-pmc", date: "2026-08-14", branch: "본부", position: "본부장", requester: "박문철", substitute: "박영주", workDetails: "신우교섭", companion: "박승환", note: "" },
-      { id: "seed-0814-bonbu-pss", date: "2026-08-14", branch: "본부", position: "조직부장", requester: "박승환", substitute: "조진명", workDetails: "신우교섭", companion: "본부장", note: "" },
-      { id: "seed-0819-bonbu-jyk", date: "2026-08-19", branch: "본부", position: "조직차장", requester: "정윤기", substitute: "최현재", workDetails: "노안활동", companion: "엄기우 (조직차장)", note: "" },
-      { id: "seed-0819-nambu", date: "2026-08-19", branch: "본부", position: "지부장", requester: "김우선", substitute: "김재선", workDetails: "저단가저지집회", companion: "문진기, 김길진", note: "" },
-      { id: "seed-0820-nambu", date: "2026-08-20", branch: "본부", position: "지부장", requester: "김우선", substitute: "김재선", workDetails: "저단가저지집회", companion: "문진기, 김길진", note: "" },
-      { id: "seed-0819-bonbu-ljy", date: "2026-08-19", branch: "본부", position: "조직차장", requester: "이준영", substitute: "임현창", workDetails: "노안활동", companion: "문주식 (조직차장)", note: "" },
-      { id: "seed-0819-bonbu-wky", date: "2026-08-19", branch: "본부", position: "조직부장", requester: "우경원", substitute: "조진명", workDetails: "노안활동 및 집회지원", companion: "", note: "" },
-      { id: "seed-0819-bonbu-mjs", date: "2026-08-19", branch: "본부", position: "조직차장", requester: "문주식", substitute: "엄기재", workDetails: "노안활동", companion: "이준영 (조직차장)", note: "" },
-      { id: "seed-0819-yongin", date: "2026-08-19", branch: "본부", position: "지부장", requester: "이우진", substitute: "이재성", workDetails: "송림건설교섭 (무인)", companion: "김정현 (처인구 조직차장)", note: "" },
-      { id: "seed-0820-yongin-wonsam", date: "2026-08-20", branch: "본부", position: "지부장", requester: "이우진", substitute: "이재성", workDetails: "원삼 동일하이빌 저단가집회", companion: "백기경, 천명환", note: "" },
-      { id: "seed-0821-yongin-daewon", date: "2026-08-21", branch: "본부", position: "지부장", requester: "이우진", substitute: "이재성", workDetails: "대원타워렌탈 교섭", companion: "이우성 (조직부장)", note: "" },
-      { id: "seed-0821-bonjo", date: "2026-08-21", branch: "본조", position: "본부장", requester: "박문철", substitute: "박영주", workDetails: "중집", companion: "", note: "" },
-      { id: "seed-0822-bonjo", date: "2026-08-22", branch: "본조", position: "본부장", requester: "박문철", substitute: "박영주", workDetails: "중집", companion: "", note: "" },
-      ...["2026-08-01", "2026-08-10", "2026-08-11", "2026-08-12", "2026-08-13", "2026-08-14", "2026-08-18", "2026-08-19", "2026-08-20", "2026-08-21", "2026-08-22"].map((d) => ({
-        id: `seed-${d}-bonjo-phj`, date: d, branch: "본조", position: "사무국장", requester: "박현진", substitute: "서두석", workDetails: "사무업무", companion: "", note: ""
-      })),
-      { id: "seed-0825-dongbu", date: "2026-08-25", branch: "본부", position: "지부장", requester: "정승일", substitute: "이재성", workDetails: "국제(유순석이사교섭)", companion: "백승진", note: "" },
-      { id: "seed-0824-yongin-ssantower", date: "2026-08-24", branch: "본부", position: "지부장", requester: "이우진", substitute: "이재성", workDetails: "싼타워 교섭", companion: "이우성 (조직부장), 우경원 (노안부장)", note: "" },
-      { id: "seed-0825-nambu", date: "2026-08-25", branch: "본부", position: "지부장", requester: "김우선", substitute: "김재선", workDetails: "제일타워 서완철이사교섭참석", companion: "김우선, 문진기", note: "" },
-      { id: "seed-0824-bonbu-pss-sk", date: "2026-08-24", branch: "본부", position: "조직부장", requester: "박승환", substitute: "조진명", workDetails: "SK현장 현설관련 집회참석", companion: "", note: "" },
-      { id: "seed-0825-bonbu-pss-sk", date: "2026-08-25", branch: "본부", position: "조직부장", requester: "박승환", substitute: "조진명", workDetails: "SK현장 현설관련 집회참석", companion: "", note: "" },
-      { id: "seed-0824-bonbu-pcs", date: "2026-08-24", branch: "본부", position: "사무장", requester: "박춘성", substitute: "윤성우", workDetails: "은행업무 및 현장리스트 정리", companion: "", note: "" },
-      { id: "seed-0824-bonbu-wky", date: "2026-08-24", branch: "본부", position: "조직부장", requester: "우경원", substitute: "백창선", workDetails: "집회참석 및 임대사교섭", companion: "집회: 박승환 부장님 / 임대사교섭: 이우성 부장님, 용인 이우진 지부장님", note: "" },
-      { id: "seed-0824-bonbu-pmc-bmk", date: "2026-08-24", branch: "본부", position: "본부장", requester: "박문철", substitute: "박영주", workDetails: "본부업무 및 BMK교섭", companion: "", note: "" },
-      { id: "seed-0825-bonbu-pmc-bmk", date: "2026-08-25", branch: "본부", position: "본부장", requester: "박문철", substitute: "박영주", workDetails: "본부업무 및 BMK교섭", companion: "", note: "" },
-      { id: "seed-0824-bukbu", date: "2026-08-24", branch: "본부", position: "북부지부장", requester: "최양호", substitute: "유종혁", workDetails: "소형 신촌동현장 미팅", companion: "윤대식", note: "" },
-      ...["2026-08-24", "2026-08-25", "2026-08-26", "2026-08-27", "2026-08-28"].map((d) => ({
-        id: `seed-${d}-bonjo-phj2`, date: d, branch: "본조", position: "사무국장", requester: "박현진", substitute: "서두석", workDetails: "사무국업무", companion: "", note: ""
-      })),
-      { id: "seed-0825-jungbu", date: "2026-08-25", branch: "본부", position: "지부장", requester: "임지병", substitute: "엄기재", workDetails: "서울SM본사 집회, 면담", companion: "이우성 (조직부장)", note: "" },
-      { id: "seed-0825-bukbu", date: "2026-08-25", branch: "본부", position: "북부지부장", requester: "최양호", substitute: "유종혁", workDetails: "하남대우현장 미팅 및 하남 소형현장 방문", companion: "서울한노지부장", note: "" },
-      { id: "seed-0826-nambu", date: "2026-08-26", branch: "본부", position: "지부장", requester: "김우선", substitute: "김재선", workDetails: "월드조 정민이사교섭 참석", companion: "박승환 (조직부장), 김우선, 문진기", note: "" },
-      { id: "seed-0825-bonbu-wky-2", date: "2026-08-25", branch: "본부", position: "조직부장", requester: "우경원", substitute: "최혁", workDetails: "북서집회참석", companion: "", note: "" },
-      { id: "seed-0826-bonbu-hdh", date: "2026-08-26", branch: "본부", position: "조직차장", requester: "홍대훈", substitute: "엄기재", workDetails: "북서 소형현장 본계약서 작성 및 교섭", companion: "북서지부장", note: "" },
-      { id: "seed-0827-bonbu-mmg", date: "2026-08-27", branch: "본부", position: "부본부장", requester: "문민곤", substitute: "엄기재", workDetails: "규약해석 및 법률자문 노무사 면담", companion: "본부장", note: "" },
-      { id: "seed-0827-bonbu-jyk", date: "2026-08-27", branch: "본부", position: "조직차장", requester: "정윤기", substitute: "최현재", workDetails: "고덕 노안활동", companion: "이준영 (조직차장)", note: "" },
-      { id: "seed-0827-bonbu-mjs", date: "2026-08-27", branch: "본부", position: "조직차장", requester: "문주식", substitute: "조진명", workDetails: "노안활동", companion: "엄기우 (조직차장)", note: "" },
-      { id: "seed-0827-bonbu-ljy", date: "2026-08-27", branch: "본부", position: "조직차장", requester: "이준영", substitute: "임현창", workDetails: "노안활동", companion: "정윤기 (조직차장)", note: "" },
-      { id: "seed-0828-bonbu-mjs", date: "2026-08-28", branch: "본부", position: "조직차장", requester: "문주식", substitute: "백기경", workDetails: "용인 노안활동", companion: "정윤기 (조직차장)", note: "" },
-      { id: "seed-0828-bonbu-jyk", date: "2026-08-28", branch: "본부", position: "조직차장", requester: "정윤기", substitute: "최현재", workDetails: "용인 노안활동", companion: "문주식 (조직차장)", note: "" },
-      { id: "seed-0828-bonbu-pcs", date: "2026-08-28", branch: "본부", position: "사무장", requester: "박춘성", substitute: "이재성", workDetails: "회계업무 및 시스템개편", companion: "한세환 사무차장", note: "" },
-      ...["2026-08-31", "2026-09-01"].map((d) => ({
-        id: `seed-${d}-bonbu-jyk-jn`, date: d, branch: "본부", position: "조직차장", requester: "정윤기", substitute: "최현재", workDetails: "전남광주 집회참석", companion: "박문철 (본부장), 엄동기, 강태규", note: ""
-      })),
-      { id: "seed-0903-bonbu-jyk", date: "2026-09-03", branch: "본부", position: "조직차장", requester: "정윤기", substitute: "최현재", workDetails: "수원 노안활동", companion: "이준영 (조직차장)", note: "" },
-      { id: "seed-0831-bonbu-pss", date: "2026-08-31", branch: "본부", position: "조직부장", requester: "박승환", substitute: "조진명", workDetails: "계룡 우미 타노조관련 방문", companion: "남부지부장", note: "" },
-      { id: "seed-0831-namseo", date: "2026-08-31", branch: "본부", position: "지부장", requester: "황창연", substitute: "박정환", workDetails: "하길리404 KCC, 동화리 SGC, 서동50 우미, 가수동453 더샵아크시티, 병점서영플러스 - 5개현장 방문 및 미팅", companion: "김철", note: "" },
-      { id: "seed-0831-bonbu-mjs", date: "2026-08-31", branch: "본부", position: "조직차장", requester: "문주식", substitute: "최원영", workDetails: "노안활동", companion: "엄기우 (조직차장)", note: "" },
-      { id: "seed-0831-nambu", date: "2026-08-31", branch: "본부", position: "지부장", requester: "김우선", substitute: "김재선", workDetails: "동탄1 계룡건설, 평택 우미건설 현장방문", companion: "박승환 (조직부장)", note: "" },
-      { id: "seed-0901-bonbu-pss", date: "2026-09-01", branch: "본부", position: "조직부장", requester: "박승환", substitute: "조진명", workDetails: "제일건설 본사 관계자 미팅", companion: "본부장", note: "" },
-      { id: "seed-0902-bonbu-pcs", date: "2026-09-02", branch: "본부", position: "사무장", requester: "박춘성", substitute: "윤성우", workDetails: "회계", companion: "한세환 사무차장", note: "" },
-      { id: "seed-0902-bonbu-pss", date: "2026-09-02", branch: "본부", position: "조직부장", requester: "박승환", substitute: "조진명", workDetails: "본부장 동행 업무", companion: "본부장", note: "" },
-      { id: "seed-0902-bonbu-mmg", date: "2026-09-02", branch: "본부", position: "부본부장", requester: "문민곤", substitute: "엄기재", workDetails: "금강교섭", companion: "본부장, 조직부장", note: "" },
+Object.keys(D).forEach(k=>D[k]=D[k].map(x=>({b:x[0],n:x[1],a:x[2],t:x[3]})));
+
+function addM(d,m){const r=new Date(d);r.setMonth(r.getMonth()+m);return r}
+function dday(n){
+  const r=R.find(x=>x.n===n);
+  if(!r)return null;
+  const exp=addM(new Date(r.s+"T00:00:00"),4), now=new Date();
+  now.setHours(0,0,0,0);
+  const diff=Math.round((exp-now)/86400000);
+  if(diff<0)return["만료 D+"+(-diff),"#D64541"];
+  if(diff<=7)return["D-"+diff,"#D64541"];
+  if(diff<=30)return["D-"+diff,"#E8A93B"];
+  return["D-"+diff,"#5F8A6B"];
+}
+function esc(s){return String(s).replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
+
+const dates=Object.keys(D).sort();
+let sel=dates[dates.length-1], mode="person", open={};
+
+function render(){
+  const entries=D[sel]||[];
+  const counts={};
+  entries.forEach(e=>counts[e.b]=(counts[e.b]||0)+1);
+
+  const totalByPerson={};
+  R.forEach(r=>totalByPerson[r.n]={...r,c:SD[r.n]||0});
+  Object.values(D).forEach(day=>day.forEach(e=>{if(totalByPerson[e.n])totalByPerson[e.n].c++}));
+  const people=Object.values(totalByPerson).sort((a,b)=>b.c-a.c);
+  const max=Math.max(1,...people.map(p=>p.c));
+
+  let stat="";
+  if(mode==="branch"){
+    const arr=Object.entries(counts).sort((a,b)=>b[1]-a[1]);
+    const mx=Math.max(1,...arr.map(x=>x[1]));
+    stat='<div class="chart">'+arr.map(([b,c])=>`<div class="barwrap"><div class="barvalue">${c}</div><div class="bar" style="height:${Math.max(3,c/mx*135)}px;background:${BC[b]||"#888"}"></div><div class="barlabel">${b}</div></div>`).join("")+'</div>';
+  } else if(mode==="person"){
+    stat='<div class="list">'+people.map(p=>{
+      const d=dday(p.n);
+      return `<div class="prow"><span class="dot" style="background:${BC[p.b]||"#888"}"></span><span class="pname">${esc(p.n)} <span class="pcount">(${p.c}회)</span></span><span class="ptag">${esc(p.b)}</span><div class="pbar"><div class="fill" style="width:${p.c/max*100}%;background:${BC[p.b]||"#888"}"></div></div>${d?`<span class="badge" style="color:${d[1]};border-color:${d[1]}">${d[0]}</span>`:""}</div>`;
+    }).join("")+'</div><div class="hint">설문(6/23이전)+카톡(6/23이후) 합산</div>';
+  } else if(mode==="bp") {
+    const branches=["북부","북서","남부","남서","동부","서부","용인","중부"];
+    stat=branches.map(b=>{
+      const ms=R.filter(r=>r.b===b).map(r=>({n:r.n,total:(SD[r.n]||0)+Object.values(D).reduce((s,day)=>s+day.filter(e=>e.n===r.n).length,0)})).sort((a,z)=>z.total-a.total);
+      if(!ms.length)return "";
+      const mx=Math.max(1,...ms.map(x=>x.total));
+      return `<div style="margin-bottom:10px"><div style="display:flex;align-items:center;gap:5px;padding:2px 6px 4px"><span class="dot" style="background:${BC[b]}"></span><span style="font-size:11px;font-weight:800;color:#f5c400">${b}지부</span><span style="font-size:10px;color:#666">${ms.length}명</span></div>${ms.map(p=>{
+        const d=dday(p.n);
+        return `<div class="prow"><span class="pname">${esc(p.n)} <span class="pcount">(${p.total}회)</span></span><div class="pbar"><div class="fill" style="width:${p.total/mx*100}%;background:${BC[b]}"></div></div>${d?`<span class="badge" style="color:${d[1]};border-color:${d[1]}">${d[0]}</span>`:""}</div>`;
+      }).join("")}</div>`;
+    }).join("")+'<div class="hint">설문(6/23이전)+카톡(6/23이후) 합산</div>';
+  } else if(mode==="pdetail") {
+    const sortedPeople=[...people].sort((a,b)=>a.n.localeCompare(b.n, 'ko'));
+    stat='<div class="list" style="padding:4px">'+sortedPeople.map(p=>{
+      const d=dday(p.n);
+      const userLogs=[];
+      Object.entries(D).forEach(([dt, list])=>{
+        list.forEach(e=>{
+          if(e.n===p.n) userLogs.push({dt, ...e});
+        });
+      });
+      userLogs.sort((a,b)=>b.dt.localeCompare(a.dt));
+      const logHtml = userLogs.length > 0 
+        ? userLogs.map(l=>`<div style="font-size:10px;color:#aaa;padding:2px 0;border-bottom:1px dashed #262626"><span style="color:#f5c400;margin-right:6px">${l.dt.slice(5)} ${l.t?l.t:""}</span>${esc(l.a)}</div>`).join("")
+        : `<div style="font-size:10px;color:#555">최근 활동 내역 없음</div>`;
       
-      // 요청하신 박현진 사무국장 대체 내역 추가 (8/31 ~ 9/4)
-      ...["2026-08-31", "2026-09-01", "2026-09-02", "2026-09-03", "2026-09-04"].map((d) => ({
-        id: `seed-${d}-bonjo-phj-sep`, date: d, branch: "본조", position: "사무국장", requester: "박현진", substitute: "서두석", workDetails: "사무업무", companion: "", note: ""
-      })),
-    ];
-
-    const SEED_ROSTER = [
-      "김우선", "김재선", "엄동섭", "엄기재", "정윤기", "최현재", "정승일", "임재명", "이우진", "임현창",
-      "박승환", "조진명", "박문철", "박영주", "이준영", "황창연", "박정환", "문주식", "우경원", "이재성",
-      "박현진", "서두석", "박춘성", "윤성우", "백창선", "유종혁", "최양호", "임지병", "최혁", "홍대훈", "문민곤", "백기경", "최원영",
-    ];
-
-    function shortDate(d) {
-      if (!d) return "";
-      const [, m, day] = d.split("-");
-      return `${m}/${day}`;
-    }
-
-    const RepeatIcon = ({ color = "#F2A93B", reverse = false }) => (
-      <svg
-        width="13"
-        height="13"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke={color}
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        style={{ transform: reverse ? "scaleX(-1)" : "none", display: "inline-block", verticalAlign: "middle" }}
-      >
-        <path d="m2 9 3-3 3 3"/>
-        <path d="M13 18H7a5 5 0 0 1-5-5V6"/>
-        <path d="m22 15-3 3-3-3"/>
-        <path d="M11 6h6a5 5 0 0 1 5 5v7"/>
-      </svg>
-    );
-
-    function SubstitutionDashboard() {
-      const [records, setRecords] = useState([]);
-      const [roster, setRoster] = useState([]);
-      const [selectedDate, setSelectedDate] = useState(null);
-      const [filterBranch, setFilterBranch] = useState("전체");
-      const [expandedReq, setExpandedReq] = useState({});
-      const [expandedSub, setExpandedSub] = useState({});
-
-      useEffect(() => {
-        let loadedRecords = [];
-        let loadedRoster = [];
-
-        try {
-          const rec = localStorage.getItem(RECORDS_KEY);
-          if (rec) loadedRecords = JSON.parse(rec);
-        } catch (e) {}
-
-        try {
-          const ros = localStorage.getItem(ROSTER_KEY);
-          if (ros) loadedRoster = JSON.parse(ros);
-        } catch (e) {}
-
-        // 새로 반영된 SEED_RECORDS로 동기화
-        loadedRecords = SEED_RECORDS;
-        localStorage.setItem(RECORDS_KEY, JSON.stringify(loadedRecords));
-
-        if (loadedRoster.length === 0) {
-          loadedRoster = SEED_ROSTER;
-          localStorage.setItem(ROSTER_KEY, JSON.stringify(loadedRoster));
-        }
-
-        setRecords(loadedRecords);
-        setRoster(loadedRoster);
-        setSelectedDate(loadedRecords[0]?.date || null);
-      }, []);
-
-      const branchList = useMemo(() => Array.from(new Set(records.map((r) => r.branch))).sort(), [records]);
-      
-      const visibleRecords = useMemo(
-        () => (filterBranch === "전체" ? records : records.filter((r) => r.branch === filterBranch)),
-        [records, filterBranch]
-      );
-
-      const dateChips = useMemo(() => {
-        const set = new Set(visibleRecords.map((r) => r.date));
-        return Array.from(set).sort().reverse();
-      }, [visibleRecords]);
-
-      const selectedCount = useMemo(() => {
-        return new Set(visibleRecords.filter((r) => r.date === selectedDate).map((r) => r.substitute)).size;
-      }, [visibleRecords, selectedDate]);
-
-      const monthTotal = useMemo(() => {
-        if (!selectedDate) return 0;
-        const ym = selectedDate.slice(0, 7);
-        return visibleRecords.filter((r) => r.date.slice(0, 7) === ym).length;
-      }, [visibleRecords, selectedDate]);
-
-      const monthLabelStr = selectedDate ? `${parseInt(selectedDate.slice(5, 7), 10)}월` : "";
-
-      const chartData = useMemo(() => {
-        const counts = {};
-        visibleRecords
-          .filter((r) => r.date === selectedDate)
-          .forEach((r) => (counts[r.substitute] = (counts[r.substitute] || 0) + 1));
-        return Object.entries(counts).map(([name, 건수]) => ({ name, 건수 }));
-      }, [visibleRecords, selectedDate]);
-
-      const requesterChartData = useMemo(() => {
-        const counts = {};
-        visibleRecords
-          .filter((r) => r.date === selectedDate)
-          .forEach((r) => (counts[r.requester] = (counts[r.requester] || 0) + 1));
-        return Object.entries(counts).map(([name, 건수]) => ({ name, 건수 }));
-      }, [visibleRecords, selectedDate]);
-
-      const rosterStats = useMemo(() => {
-        return roster.map((name) => {
-          const asRequester = visibleRecords.filter((r) => r.requester === name);
-          const asSubstitute = visibleRecords.filter((r) => r.substitute === name);
-          const all = [...asRequester, ...asSubstitute].sort((a, b) => (a.date < b.date ? 1 : -1));
-          return {
-            name,
-            requestCount: asRequester.length,
-            substituteCount: asSubstitute.length,
-            lastDate: all[0]?.date || null,
-          };
-        });
-      }, [roster, visibleRecords]);
-
-      const roleChartData = useMemo(
-        () => rosterStats.map((m) => ({ name: m.name, 신청: m.requestCount, 대체: m.substituteCount })),
-        [rosterStats]
-      );
-
-      const requesterList = useMemo(() => rosterStats.filter((m) => m.requestCount > 0).sort((a, b) => b.requestCount - a.requestCount), [rosterStats]);
-      const substituteList = useMemo(() => rosterStats.filter((m) => m.substituteCount > 0).sort((a, b) => b.substituteCount - a.substituteCount), [rosterStats]);
-
-      const byRequester = useMemo(() => {
-        const map = {};
-        visibleRecords.forEach((r) => {
-          if (!map[r.requester]) map[r.requester] = [];
-          map[r.requester].push(r);
-        });
-        return Object.entries(map)
-          .map(([requester, items]) => ({
-            requester,
-            items: items.sort((a, b) => (a.date < b.date ? 1 : -1)),
-          }))
-          .sort((a, b) => (a.items[0].date < b.items[0].date ? 1 : -1));
-      }, [visibleRecords]);
-
-      const bySubstitute = useMemo(() => {
-        const map = {};
-        visibleRecords.forEach((r) => {
-          if (!map[r.substitute]) map[r.substitute] = [];
-          map[r.substitute].push(r);
-        });
-        return Object.entries(map)
-          .map(([substitute, items]) => ({
-            substitute,
-            items: items.sort((a, b) => (a.date < b.date ? 1 : -1)),
-          }))
-          .sort((a, b) => (a.items[0].date < b.items[0].date ? 1 : -1));
-      }, [visibleRecords]);
-
-      return (
-        <div className="min-h-screen max-w-2xl mx-auto" style={{ background: "#121418" }}>
-          <div className="px-5 pt-5 pb-4">
-            <p className="text-[11px] font-bold mb-1" style={{ color: "#F2A93B" }}>
-              경기지역본부 · 업무대체 관리방
-            </p>
-            <div className="flex items-end justify-between">
-              <h1 className="text-white font-extrabold text-2xl tracking-tight">업무대체 현황판</h1>
-              <div className="text-right">
-                <p className="text-white font-extrabold text-3xl leading-none font-mono">{selectedCount}</p>
-                <p className="text-[10px] mt-1" style={{ color: "#8A8F98" }}>
-                  {selectedDate ? shortDate(selectedDate) : "-"} 대체 인원
-                </p>
-              </div>
-            </div>
+      return `<div style="background:#222;border:1px solid #2a2a2a;border-radius:8px;padding:10px;margin-bottom:8px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+          <div style="display:flex;align-items:center;gap:6px">
+            <span class="dot" style="background:${BC[p.b]||"#888"}"></span>
+            <span style="font-size:14px;font-weight:800;color:#fff">${esc(p.n)} <span style="font-size:12px;color:#f5c400">(${p.c}회)</span></span>
+            <span style="font-size:10px;color:#888;background:#161616;padding:2px 6px;border-radius:4px">${esc(p.b)}지부</span>
           </div>
-
-          {dateChips.length > 0 && (
-            <div className="flex gap-2 px-5 pb-3 overflow-x-auto">
-              {dateChips.map((d) => (
-                <button
-                  key={d}
-                  onClick={() => setSelectedDate(d)}
-                  className="shrink-0 px-4 py-2 rounded-full text-sm font-bold font-mono"
-                  style={d === selectedDate ? { background: "#F2A93B", color: "#1C2127" } : { background: "#1E2126", color: "#8A8F98" }}
-                >
-                  {shortDate(d)}
-                </button>
-              ))}
-            </div>
-          )}
-
-          {branchList.length > 0 && (
-            <div className="flex gap-2 px-5 pb-4 overflow-x-auto">
-              <button
-                onClick={() => setFilterBranch("전체")}
-                className="shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold border"
-                style={filterBranch === "전체" ? { background: "#5B8DEF", borderColor: "#5B8DEF", color: "#fff" } : { background: "transparent", borderColor: "#2A2D33", color: "#8A8F98" }}
-              >
-                전체
-              </button>
-              {branchList.map((b) => (
-                <button
-                  key={b}
-                  onClick={() => setFilterBranch(b)}
-                  className="shrink-0 px-3 py-1.5 rounded-lg text-xs font-bold border"
-                  style={filterBranch === b ? { background: "#5B8DEF", borderColor: "#5B8DEF", color: "#fff" } : { background: "transparent", borderColor: "#2A2D33", color: "#8A8F98" }}
-                >
-                  {b}
-                </button>
-              ))}
-            </div>
-          )}
-
-          <div className="px-4 pb-10">
-            <div className="rounded-2xl px-4 py-3 mb-5 flex items-center justify-between" style={{ background: "#1A1D22" }}>
-              <span className="text-sm font-bold" style={{ color: "#8A8F98" }}>
-                {monthLabelStr} 총 대체건수{filterBranch !== "전체" ? ` · ${filterBranch}` : ""}
-              </span>
-              <span className="text-xl font-extrabold font-mono text-white">
-                {monthTotal}
-                <span className="text-xs font-normal ml-0.5" style={{ color: "#8A8F98" }}>
-                  건
-                </span>
-              </span>
-            </div>
-
-            {/* 개인별 대체 인원 그래프 */}
-            <div className="rounded-2xl p-4 mb-5" style={{ background: "#1A1D22" }}>
-              <p className="text-sm font-bold text-white mb-4">개인별 대체 인원</p>
-              {chartData.length === 0 ? (
-                <p className="text-xs text-center py-10" style={{ color: "#5B6069" }}>
-                  해당 날짜에 등록된 대체보고가 없습니다.
-                </p>
-              ) : (
-                <ResponsiveContainer width="100%" height={200}>
-                  <BarChart data={chartData} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#2A2D33" />
-                    <XAxis dataKey="name" tick={{ fontSize: 12, fill: "#8A8F98" }} axisLine={{ stroke: "#2A2D33" }} tickLine={false} />
-                    <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: "#8A8F98" }} axisLine={false} tickLine={false} />
-                    <Tooltip cursor={{ fill: "#25282E" }} contentStyle={{ background: "#1E2126", border: "1px solid #2A2D33", borderRadius: 8, fontSize: 12, color: "#fff" }} />
-                    <Bar dataKey="건수" radius={[6, 6, 0, 0]} barSize={44}>
-                      {chartData.map((d, i) => (
-                        <Cell key={i} fill={PERSON_PALETTE[i % PERSON_PALETTE.length]} />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              )}
-            </div>
-
-            {/* 신청자별 인원 그래프 */}
-            <div className="rounded-2xl p-4 mb-5" style={{ background: "#1A1D22" }}>
-              <p className="text-sm font-bold text-white mb-4">신청자별 인원</p>
-              {requesterChartData.length === 0 ? (
-                <p className="text-xs text-center py-10" style={{ color: "#5B6069" }}>
-                  해당 날짜에 등록된 대체보고가 없습니다.
-                </p>
-              ) : (
-                <ResponsiveContainer width="100%" height={200}>
-                  <BarChart data={requesterChartData} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#2A2D33" />
-                    <XAxis dataKey="name" tick={{ fontSize: 12, fill: "#8A8F98" }} axisLine={{ stroke: "#2A2D33" }} tickLine={false} />
-                    <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: "#8A8F98" }} axisLine={false} tickLine={false} />
-                    <Tooltip cursor={{ fill: "#25282E" }} contentStyle={{ background: "#1E2126", border: "1px solid #2A2D33", borderRadius: 8, fontSize: 12, color: "#fff" }} />
-                    <Bar dataKey="건수" radius={[6, 6, 0, 0]} barSize={44}>
-                      {requesterChartData.map((d, i) => (
-                        <Cell key={i} fill={PERSON_PALETTE[i % PERSON_PALETTE.length]} />
-                      ))}
-                    </Bar>
-                  </BarChart>
-                </ResponsiveContainer>
-              )}
-            </div>
-
-            {/* 신청자/대체자 역할별 그래프 */}
-            <div className="rounded-2xl p-4 mb-5" style={{ background: "#1A1D22" }}>
-              <div className="flex items-center gap-4 mb-4">
-                <p className="text-sm font-bold text-white">대체신청자 · 대체조합원별 건수</p>
-                <div className="flex items-center gap-3 text-[11px]" style={{ color: "#8A8F98" }}>
-                  <span className="flex items-center gap-1">
-                    <span className="w-2 h-2 rounded-full inline-block" style={{ background: "#F2A93B" }} /> 신청
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <span className="w-2 h-2 rounded-full inline-block" style={{ background: "#5B8DEF" }} /> 대체
-                  </span>
-                </div>
-              </div>
-              {roleChartData.length === 0 ? (
-                <p className="text-xs text-center py-10" style={{ color: "#5B6069" }}>
-                  등록된 명단이 없습니다.
-                </p>
-              ) : (
-                <ResponsiveContainer width="100%" height={200}>
-                  <BarChart data={roleChartData} margin={{ top: 8, right: 8, left: -20, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#2A2D33" />
-                    <XAxis dataKey="name" tick={{ fontSize: 12, fill: "#8A8F98" }} axisLine={{ stroke: "#2A2D33" }} tickLine={false} />
-                    <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: "#8A8F98" }} axisLine={false} tickLine={false} />
-                    <Tooltip cursor={{ fill: "#25282E" }} contentStyle={{ background: "#1E2126", border: "1px solid #2A2D33", borderRadius: 8, fontSize: 12, color: "#fff" }} />
-                    <Bar dataKey="신청" fill="#F2A93B" radius={[4, 4, 0, 0]} barSize={20} />
-                    <Bar dataKey="대체" fill="#5B8DEF" radius={[4, 4, 0, 0]} barSize={20} />
-                  </BarChart>
-                </ResponsiveContainer>
-              )}
-            </div>
-
-            {/* 명단 분리 */}
-            <div className="grid grid-cols-2 gap-3 mb-5">
-              <div className="rounded-2xl overflow-hidden" style={{ background: "#1A1D22" }}>
-                <p className="text-xs font-bold px-4 pt-3 pb-2" style={{ color: "#F2A93B" }}>
-                  신청자 명단
-                </p>
-                {requesterList.length === 0 ? (
-                  <p className="text-xs text-center py-6" style={{ color: "#5B6069" }}>
-                    없음
-                  </p>
-                ) : (
-                  requesterList.map((m, i) => (
-                    <div key={m.name} className="flex items-center justify-between px-4 py-2.5" style={i > 0 ? { borderTop: "1px solid #25282E" } : {}}>
-                      <span className="text-sm font-bold text-white">{m.name}</span>
-                      <span className="text-xs font-mono" style={{ color: "#8A8F98" }}>
-                        {m.requestCount}회
-                      </span>
-                    </div>
-                  ))
-                )}
-              </div>
-              <div className="rounded-2xl overflow-hidden" style={{ background: "#1A1D22" }}>
-                <p className="text-xs font-bold px-4 pt-3 pb-2" style={{ color: "#5B8DEF" }}>
-                  대체자 명단
-                </p>
-                {substituteList.length === 0 ? (
-                  <p className="text-xs text-center py-6" style={{ color: "#5B6069" }}>
-                    없음
-                  </p>
-                ) : (
-                  substituteList.map((m, i) => (
-                    <div key={m.name} className="flex items-center justify-between px-4 py-2.5" style={i > 0 ? { borderTop: "1px solid #25282E" } : {}}>
-                      <span className="text-sm font-bold text-white">{m.name}</span>
-                      <span className="text-xs font-mono" style={{ color: "#8A8F98" }}>
-                        {m.substituteCount}회
-                      </span>
-                    </div>
-                  ))
-                )}
-              </div>
-            </div>
-
-            {/* 신청자별 리스트 */}
-            <p className="text-sm font-bold mb-2 px-1" style={{ color: "#8A8F98" }}>
-              신청자별 리스트
-            </p>
-            {byRequester.length === 0 ? (
-              <div className="rounded-2xl p-8 text-center text-sm" style={{ background: "#1A1D22", color: "#5B6069" }}>
-                등록된 대체보고가 없습니다.
-              </div>
-            ) : (
-              <div className="flex flex-col gap-3">
-                {byRequester.map(({ requester, items }) => {
-                  const isExpanded = !!expandedReq[requester];
-                  return (
-                    <div key={requester} className="rounded-2xl overflow-hidden" style={{ background: "#1A1D22" }}>
-                      <button
-                        onClick={() => setExpandedReq((c) => ({ ...c, [requester]: !c[requester] }))}
-                        className="w-full flex items-center justify-between px-4 py-3.5"
-                      >
-                        <span className="text-sm font-bold text-white">
-                          {requester}{" "}
-                          <span className="text-xs font-normal font-mono" style={{ color: "#8A8F98" }}>
-                            {shortDate(items[0].date)}
-                          </span>{" "}
-                          <span className="text-xs font-normal" style={{ color: "#5B6069" }}>신청 {items.length}건</span>
-                        </span>
-                        <span className="text-xs" style={{ color: "#5B6069" }}>{isExpanded ? "접기" : "펼치기"}</span>
-                      </button>
-                      {isExpanded && (
-                        <div>
-                          {items.map((r) => (
-                            <div key={r.id} className="px-4 py-3 border-t" style={{ borderColor: "#25282E" }}>
-                              <div className="flex items-center gap-1.5 text-sm font-bold mb-1.5 text-white">
-                                <span className="text-[11px] font-mono font-normal" style={{ color: "#8A8F98" }}>
-                                  {shortDate(r.date)}
-                                </span>
-                                <span className="text-[10px] font-normal px-1.5 py-0.5 rounded" style={{ background: "#25282E", color: "#8A8F98" }}>
-                                  {r.branch}
-                                </span>
-                                <RepeatIcon color="#F2A93B" />
-                                <span>{r.substitute}</span>
-                              </div>
-                              {r.workDetails && (
-                                <p className="text-xs whitespace-pre-line mb-1.5" style={{ color: "#C4C8CE" }}>
-                                  {r.workDetails}
-                                </p>
-                              )}
-                              {r.companion && (
-                                <p className="text-[11px]" style={{ color: "#5B6069" }}>
-                                  동반자: {r.companion}
-                                </p>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            )}
-
-            {/* 대체자별 리스트 */}
-            <p className="text-sm font-bold mb-2 mt-5 px-1" style={{ color: "#8A8F98" }}>
-              대체자별 리스트
-            </p>
-            {bySubstitute.length === 0 ? (
-              <div className="rounded-2xl p-8 text-center text-sm" style={{ background: "#1A1D22", color: "#5B6069" }}>
-                등록된 대체보고가 없습니다.
-              </div>
-            ) : (
-              <div className="flex flex-col gap-3">
-                {bySubstitute.map(({ substitute, items }) => {
-                  const isExpanded = !!expandedSub[substitute];
-                  return (
-                    <div key={substitute} className="rounded-2xl overflow-hidden" style={{ background: "#1A1D22" }}>
-                      <button
-                        onClick={() => setExpandedSub((c) => ({ ...c, [substitute]: !c[substitute] }))}
-                        className="w-full flex items-center justify-between px-4 py-3.5"
-                      >
-                        <span className="text-sm font-bold text-white">
-                          {substitute}{" "}
-                          <span className="text-xs font-normal font-mono" style={{ color: "#8A8F98" }}>
-                            {shortDate(items[0].date)}
-                          </span>{" "}
-                          <span className="text-xs font-normal" style={{ color: "#5B6069" }}>대체 {items.length}건</span>
-                        </span>
-                        <span className="text-xs" style={{ color: "#5B6069" }}>{isExpanded ? "접기" : "펼치기"}</span>
-                      </button>
-                      {isExpanded && (
-                        <div>
-                          {items.map((r) => (
-                            <div key={r.id} className="px-4 py-3 border-t" style={{ borderColor: "#25282E" }}>
-                              <div className="flex items-center gap-1.5 text-sm font-bold mb-1.5 text-white">
-                                <span className="text-[11px] font-mono font-normal" style={{ color: "#8A8F98" }}>
-                                  {shortDate(r.date)}
-                                </span>
-                                <span className="text-[10px] font-normal px-1.5 py-0.5 rounded" style={{ background: "#25282E", color: "#8A8F98" }}>
-                                  {r.branch}
-                                </span>
-                                <RepeatIcon color="#5B8DEF" reverse={true} />
-                                <span>{r.requester}</span>
-                              </div>
-                              {r.workDetails && (
-                                <p className="text-xs whitespace-pre-line mb-1.5" style={{ color: "#C4C8CE" }}>
-                                  {r.workDetails}
-                                </p>
-                              )}
-                              {r.companion && (
-                                <p className="text-[11px]" style={{ color: "#5B6069" }}>
-                                  동반자: {r.companion}
-                                </p>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
-            )}
+          <div>
+            ${d?`<span class="badge" style="color:${d[1]};border-color:${d[1]}">${d[0]}</span>`:""}
           </div>
         </div>
-      );
-    }
+        <div style="background:#1a1a1a;border-radius:6px;padding:6px 8px;max-height:100px;overflow-y:auto">${logHtml}</div>
+      </div>`;
+    }).join("")+'</div>';
+  }
 
-    const root = ReactDOM.createRoot(document.getElementById("root"));
-    root.render(<SubstitutionDashboard />);
-  </script>
+  let sectionContent = "";
+  if(mode !== "pdetail") {
+    const groups={};
+    R.forEach(r=>(groups[r.b]??=[]).push(r));
+    const names=Object.entries(groups).sort((a,b)=>b[1].length-a[1].length).map(([b,list])=>{
+      const reported=list.filter(r=>entries.some(e=>e.n===r.n)).length, isOpen=open[b]!==false;
+      const rows=list.map(r=>{
+        const e=entries.find(x=>x.n===r.n),d=dday(r.n);
+        const pObj=people.find(x=>x.n===r.n);
+        const cnt=pObj?pObj.c:0;
+        return `<div class="erow" style="opacity:${e?1:.5}"><div class="etime">${e&&e.t?e.t:"--:--"}</div><div class="ebody"><div class="ename">${esc(r.n)} <span style="font-size:11px;color:#f5c400;font-weight:bold">(${cnt}회)</span></div><div class="eact">${e?esc(e.a):"미보고"}</div></div>${d?`<span class="badge" style="color:${d[1]};border-color:${d[1]}">${d[0]}</span>`:""}</div>`;
+      }).join("");
+      return `<div class="branch"><button class="bhead" onclick="toggleBranch('${b}')"><span class="bleft"><span class="dot" style="background:${BC[b]||"#888"}"></span><span class="bname">${b}지부</span><span class="bcnt">${list.length}명 · 보고${reported}</span></span><span style="color:#888">${isOpen?"⌃":"⌄"}</span></button>${isOpen?'<div class="entries">'+rows+'</div>':""}</div>`;
+    }).join("");
+    sectionContent = `<div class="section"><div class="sectionhead">지부별 명단 · ${sel.slice(5).replace("-","/")}</div>${names}</div>`;
+  }
+
+  document.getElementById("app").innerHTML=`
+    <div class="app">
+      <header>
+        <div class="top">
+          <div>
+            <div class="eyebrow">경기지역본부 · 통합 대기자 활동방</div>
+            <h1 class="title">대기활동 현황판</h1>
+          </div>
+          <div>
+            <div class="big">${entries.length}</div>
+            <div class="small">오늘 보고 인원</div>
+          </div>
+        </div>
+        <div class="dates">${dates.map(d=>`<button class="chip ${d===sel?"active":""}" onclick="selectDate('${d}')">${d.slice(5).replace("-","/")}</button>`).join("")}</div>
+      </header>
+      <div class="card">
+        <div class="cardhead">
+          <div class="label">${mode==="branch"?"지부별 활동 인원":mode==="person"?"개인별 누적 활동횟수":mode==="bp"?"지부별 개인 누적횟수":"개인별 명단 및 활동이력"}</div>
+          <div class="tabs">
+            <button class="tab ${mode==="branch"?"active":""}" onclick="setMode('branch')">◉ 지부별</button>
+            <button class="tab ${mode==="person"?"active":""}" onclick="setMode('person')">◯ 개인별</button>
+            <button class="tab ${mode==="bp"?"active":""}" onclick="setMode('bp')">지부·개인</button>
+            <button class="tab ${mode==="pdetail"?"active":""}" onclick="setMode('pdetail')">개인명단</button>
+          </div>
+        </div>
+        ${stat}
+      </div>
+      ${sectionContent}
+      <div class="footer">총원 ${R.length}명 · 누구나 로그인 없이 볼 수 있습니다</div>
+    </div>
+  `;
+}
+
+function selectDate(d){sel=d;render()}
+function setMode(m){mode=m;render()}
+function toggleBranch(b){open[b]=open[b]===false;render()}
+
+render();
+</script>
 </body>
 </html>
